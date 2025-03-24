@@ -1,21 +1,29 @@
-﻿using Xunit;
-using Moq;
-using Microsoft.AspNetCore.Mvc;
-using Fruitmand.Controllers;
-using Fruitmand.Models;
-using Fruitmand.Services;
+﻿using Fruitmand.Controllers;
 using Fruitmand.Interfaces;
+using Fruitmand.Models.Dto;
+using Fruitmand.Models;
+using Microsoft.AspNetCore.Mvc;
+using Moq;
 
 namespace FruitBasketApi.Tests
 {
     public class FruitControllerTests
     {
+        private readonly Mock<IFruitStorageService> _mockService;
+        private readonly FruitController _controller;
+
+        public FruitControllerTests()
+        {
+            _mockService = new Mock<IFruitStorageService>();
+            _controller = new FruitController(_mockService.Object);
+        }
+
         [Fact]
         public async Task GetOldest_ReturnsNotFound_WhenNoFruitExists()
         {
-            var mockService = new Mock<IFruitStorageService>(); mockService.Setup(s => s.GetOldestFruitAsync("appel")).ReturnsAsync((FruitItem?)null);
-            var controller = new FruitController(mockService.Object);
-            var result = await controller.GetOldest("appel");
+            _mockService.Setup(s => s.GetOldestFruitAsync("appel")).ReturnsAsync((FruitItem?)null);
+
+            var result = await _controller.GetOldest("appel");
 
             Assert.IsType<NotFoundResult>(result);
         }
@@ -23,11 +31,15 @@ namespace FruitBasketApi.Tests
         [Fact]
         public async Task GetOldest_ReturnsFruit_WhenExists()
         {
-            var mockService = new Mock<IFruitStorageService>(); var fruit = new FruitItem { SoortFruit = "appel", AankoopDatum = DateTime.UtcNow };
-            mockService.Setup(s => s.GetOldestFruitAsync("appel")).ReturnsAsync(fruit);
+            var fruit = new FruitItem
+            {
+                SoortFruit = "appel",
+                AankoopDatum = DateTime.UtcNow
+            };
 
-            var controller = new FruitController(mockService.Object);
-            var result = await controller.GetOldest("appel") as OkObjectResult;
+            _mockService.Setup(s => s.GetOldestFruitAsync("appel")).ReturnsAsync(fruit);
+
+            var result = await _controller.GetOldest("appel") as OkObjectResult;
 
             Assert.NotNull(result);
             Assert.Equal(fruit, result.Value);
@@ -36,14 +48,12 @@ namespace FruitBasketApi.Tests
         [Fact]
         public async Task DeleteMand_CallsService()
         {
-            var mockService = new Mock<IFruitStorageService>();
-            mockService.Setup(s => s.DeleteAllFruitsAsync()).Returns(Task.CompletedTask).Verifiable();
+            _mockService.Setup(s => s.DeleteAllFruitsAsync()).Returns(Task.CompletedTask).Verifiable();
 
-            var controller = new FruitController(mockService.Object);
-            var result = await controller.DeleteMand();
+            var result = await _controller.DeleteMand();
 
             Assert.IsType<OkResult>(result);
-            mockService.Verify(s => s.DeleteAllFruitsAsync(), Times.Once);
+            _mockService.Verify(s => s.DeleteAllFruitsAsync(), Times.Once);
         }
     }
 }

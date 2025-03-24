@@ -2,16 +2,20 @@
 using Fruitmand.Interfaces;
 using Fruitmand.Models;
 using Fruitmand.Models.Dto;
-using Fruitmand.Services;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
-using System.Dynamic;
-using System.Text.Json;
 
 namespace FruitBasketApi.Tests
 {
     public class FruitStorageServiceTests
     {
+        private readonly Mock<IFruitStorageService> _mockService;
+
+        public FruitStorageServiceTests()
+        {
+            _mockService = new Mock<IFruitStorageService>();
+        }
+
         [Theory]
         [InlineData("banaan", null, 4)]
         [InlineData("appel", null, 8)]
@@ -28,17 +32,16 @@ namespace FruitBasketApi.Tests
         public async Task GetMand_ReturnsCorrectSpoilage()
         {
             var fruits = new List<FruitItem>
-    {
-        new() { SoortFruit = "appel", AankoopDatum = DateTime.UtcNow.AddDays(-9) }, // spoiled
-        new() { SoortFruit = "appel", AankoopDatum = DateTime.UtcNow.AddDays(-1) },
-        new() { SoortFruit = "banaan", AankoopDatum = DateTime.UtcNow.AddDays(-5) }, // spoiled
-        new() { SoortFruit = "kiwi", AankoopDatum = DateTime.UtcNow.AddDays(-1) }
-    };
+            {
+                new() { SoortFruit = "appel", AankoopDatum = DateTime.UtcNow.AddDays(-9) }, // spoiled
+                new() { SoortFruit = "appel", AankoopDatum = DateTime.UtcNow.AddDays(-1) },
+                new() { SoortFruit = "banaan", AankoopDatum = DateTime.UtcNow.AddDays(-5) }, // spoiled
+                new() { SoortFruit = "kiwi", AankoopDatum = DateTime.UtcNow.AddDays(-1) }
+            };
 
-            var mockService = new Mock<IFruitStorageService>();
-            mockService.Setup(s => s.GetAllFruitsAsync()).ReturnsAsync(fruits);
+            _mockService.Setup(s => s.GetAllFruitsAsync()).ReturnsAsync(fruits);
 
-            var controller = new FruitController(mockService.Object);
+            var controller = new FruitController(_mockService.Object);
             var result = await controller.GetMand() as OkObjectResult;
 
             Assert.NotNull(result);

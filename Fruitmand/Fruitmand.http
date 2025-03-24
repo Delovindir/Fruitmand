@@ -1,0 +1,6 @@
+@Fruitmand_HostAddress = http://localhost:5063
+
+GET {{Fruitmand_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

@@ -19,7 +19,7 @@ namespace Fruitmand.Controllers
         }
 
         [HttpPut("{soort}")]
-        public async Task<IActionResult> AddFruit(string soort, [FromBody] AddFruitRequest body)
+        public async Task<IActionResult> AddFruit(string soort, [FromBody] AddFruitDto body)
         {
             var fruit = new FruitItem
             {

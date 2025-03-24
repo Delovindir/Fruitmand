@@ -1,6 +1,6 @@
 ﻿namespace Fruitmand.Models.Dto
 {
-    public class AddFruitRequest
+    public class AddFruitDto
     {
         public DateTime AankoopDatum { get; set; }
         public bool? IsBiologisch { get; set; }
